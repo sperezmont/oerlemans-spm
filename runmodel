@@ -1,0 +1,57 @@
+#! /bin/bash
+
+# Script to run Oerlemans-spm model
+echo ''
+echo '## Running Oerlemans model ##'
+
+# Paths
+parfile=${1}
+outname=${2}
+
+echo '* Parameter file --> '${parfile}''
+echo '* Output directory name --> '${outname}''
+
+locdir=$(pwd)
+locouttemp=${locdir}/temp/${outname}/
+
+# Create directories if needed
+if [ -d ${locouttemp} ]; then
+echo '* '${outname}' already created'
+else
+mkdir ${locouttemp}
+echo '* '${outname}' created'
+fi
+
+# Copy oerlemans_main.py and parameters
+cp ${locdir}/libs/oerlemans_main.py ${locouttemp}
+cp -r ${locdir}/libs/ ${locouttemp}
+cp ${locdir}/par/${parfile} ${locouttemp}/params.py
+
+# Execute oerlemans_main.py
+cd ${locouttemp}
+echo ''
+echo '** Starting simulation **'
+chmod +x oerlemans_main.py
+python3 oerlemans_main.py
+
+# Move to output and clean
+rm __pycache__/*
+rmdir __pycache__
+rm libs/__pycache__/*
+rmdir libs/__pycache__
+
+rm libs/*
+rmdir libs/
+
+rm oerlemans_main.py
+cd ..
+cp -r ${outname} ../output/
+
+rm ${outname}/*
+rmdir ${outname}
+
+echo '** Simulation finished **'
+echo ''
+
+
+
