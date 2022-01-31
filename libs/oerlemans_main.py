@@ -1,4 +1,5 @@
 #  Python libraries
+import matplotlib.pyplot as plt
 import os
 import sys
 import netCDF4 as nc
@@ -7,65 +8,85 @@ import numpy as np
 # Model libraries
 import params
 from libs import ice_parameters as ips
-from libs import ice_profile as ip
-from libs import ice_volume as iv
-from libs import ice_transient as it
-from libs import outmkr as outmkr
+from libs import bed_profile as bp
+from libs import mass_balance as mb
+from libs import ice_profile as ipf
 
-# Parameters
-R, rstep, s, d0, mu0, c = params.R, params.rstep, params.s, params.d0, params.mu0, params.c
+# First, asses the parameter settings
+bed_type = params.bed_type
+
+hx_model = params.hx_model
+geo_model = params.geo_model
+
+sea_level = params.sea_level
+
+Acc_model = params.Acc_model
+
+# Now, we load the variables we need
+# BED PROFILE
+if bed_type == 'linear':
+    d0, s = params.d0, params.s
+
+# MATERIAL APROXIMATION
+if hx_model == 'plastic':
+    if geo_model == 'oerlemans2003':
+        mu0, c, s = params.mu0, params.c, params.s
+        mu = ips.mu(mu0, c, s)
+
+# Second, we load the initial conditions
+domain, zdomain, dx, dz = params.domain * \
+    1e3, params.zdomain, params.dx * 1e3, params.dz
+dt, T = params.dt, params.T
+R0 = params.R0 * 1e3
+A0, CR = params.A0, params.CR * 1e3
+
 rhoi, rhow, rhob = params.rhoi, params.rhow, params.rhob
+f = params.f
+eps1, eps2, delta = rhoi/(rhob-rhoi), rhow/(rhob-rhoi), rhow/rhoi
 
-beta, A0, f = params.beta, params.A0, params.f
-R0, dt, hE_step = params.R0, params.dt, params.hE_step
+if sea_level == 'constant':
+    eta = params.eta0
 
-eta = params.eta
+# Third, we calculate the bed
+x = np.arange(0, domain + dx, dx)
+d = bp.bed_profile(bed_type, x, d0, s)
 
-mu = ips.mu(mu0, c, s)
+# Fourth, let's calculate the time evolution
+times = np.arange(0, T + dt, dt)
+y = np.arange(0, zdomain + dz, dz)
+Revo = np.empty(len(times))
+hevo = np.empty((len(times), len(y), len(x)))
+zevo = np.empty((len(times), len(y), len(x)))
 
-# First, we calculate the diagnostic variables
-print('--> Calculating diagnostic variables ... ')
-h, d, marine, rgr, rc, r = ip.profile(R, s, d0, mu, rstep)   # ice profile
+Revo[0] = R0
+for t in range(1, len(times)):
 
-V, Vsea, Vtot, r = iv.volume(
-    R, marine, rc, s, d0, mu, rhoi=rhoi, rhow=rhow, rhob=rhob, rstep=50)
+    R = Revo[t-1]
 
-# Second, we calculate the transient variables
-print('--> Transient simulation is now in progress ... ')
-hE = np.arange(-5*d0, 5*(d0 + hE_step), hE_step)
-trans_list, trans_list2, gl_list, gl_list2, ic_type_list, ic_type_list2 = [], [], [], [], [], []
-for i in hE:
-    transnostic, gl, ic_type = it.transient(
-        R0*1000, s, d0, mu, dt, i, rhoi, rhow, rhob, beta, A0, eta, f)
-    transnostic2, gl2, ic_type2 = it.transient(
-        1e-5, s, d0, mu, dt, i, rhoi, rhow, rhob, beta, A0, eta, f)
-    trans_list.append(transnostic/1000)
-    gl_list.append(gl)
-    ic_type_list.append(ic_type)
-    trans_list2.append(transnostic2/1000)
-    gl_list2.append(gl2)
-    ic_type_list2.append(ic_type2)
+    zevo[t, :, :] = ipf.z_profile(hx_model, d, R, x, mu)
+    hevo[t, :, :] = ipf.ice_thickness(hx_model, R, x, mu)
 
-trans_list, gl_list, ic_type_list = np.array(
-    trans_list), np.array(gl_list), np.array(ic_type_list)
-trans_list2, gl_list2, ic_type_list2 = np.array(
-    trans_list2), np.array(gl_list2), np.array(ic_type_list2)
+    if bed_type == 'linear':    # asses if marine ice-sheet
+        rc = (d0 - eta)/s * 1e-3
 
-# Now we save the results
-print('--> Saving results ...')
-diagnostic = [h, d, rgr, rc, marine, Vtot, V, Vsea]
-names = ['h(r)', 'd(r)', 'rgr(R)', 'rc(R)',
-         'marine', 'Vtot(R)', 'V(R)', 'Vsea(R)']
-units = ['m', 'm', 'km', 'km', '', 'km3', 'km3', 'km3']
+    if R >= rc:
+        marine = True
+    else:
+        marine = False
 
-outmkr.mk_file_multiple(diagnostic, names, units, r, 'km', 'r',
-                        os.getcwd()+'/oerlemans_diagnostic.nc')
+    if marine:  # A calculation
+        A = mb.calcA('exp', A0, CR, R)
+    else:
+        A = mb.calcA('constant', A0)
 
-transient_hE = [trans_list, trans_list2, gl_list,
-                gl_list2, ic_type_list, ic_type_list2]
-names = ['Req(hE, R0)', 'Req(hE, 0)', 'GL(hE, R0)', 'GL(hE, 0)',
-         'IceSheetType(R0)', 'IceSheetType(0)']
-units = ['km', 'km', 'km', 'km', '', '']
+    if Acc_model == 'linear':
+        zE, beta = params.zE0, params.beta
+        zR = zE + A/beta
+        MB = mb.calc_MB(marine, bed_type, hx_model, R,
+                        zR, d0, s, mu, A, beta, f, delta, eta)
+        M = mb.calc_M(marine, bed_type, hx_model, R, s, d0, mu, eps1, eps2)
 
-outmkr.mk_file_multiple(transient_hE, names, units, hE, 'm', 'hE',
-                        os.getcwd()+'/oerlemans_transient.nc')
+        Revo[t] = R + MB/M*dt
+
+plt.plot(zevo[0, :, :])
+plt.show()
