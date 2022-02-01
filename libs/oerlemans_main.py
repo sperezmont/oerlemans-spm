@@ -87,7 +87,7 @@ for t in range(1, len(times)):
     # profile generation
     zevo[t, :], hevo[t, :] = ipf.zh_calc(x, d, hx_model, Revo[t], mu)
 
-# Now we store the results on oerlemans2D.nc
+# Now we store the results in oerlemans2D.nc
 dimnames, dimdata, dimunits, dimlens = ['time', 'x'], [
     times, x/1e3], ['yr', 'km'], [None, len(x)]
 ds = outmkr.mk_nc_file('oerlemans2D.nc', dimnames, dimdata, dimunits, dimlens)
