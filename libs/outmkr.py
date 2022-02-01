@@ -1,37 +1,37 @@
 import netCDF4 as nc
 import numpy as np
-import os
 
 
-def mk_file(data1, name1, units1, data2, name2, units2, dimname, file_name):
+def mk_nc_file(file_name, dimnames, dimdata, dimunits, dimlens):
     fn = file_name
     ds = nc.Dataset(fn, 'w', format='NETCDF4')
 
-    dim = ds.createDimension(dimname, None)
+    for i in range(len(dimnames)):
+        dim = ds.createDimension(dimnames[i], dimlens[i])
+        dimvar = ds.createVariable(dimnames[i], 'f4', (dimnames[i],))
+        dimvar.units = dimunits[i]
+        dimvar[:] = dimdata[i]
 
-    var1 = ds.createVariable(name1, 'f4', (dimname,))
-    var1.units = units1
-    var1[:] = data1
-
-    var2 = ds.createVariable(name2, 'f4', (dimname,))
-    var2.units = units2
-    var2[:] = data2
-
-    ds.close()
+    return ds
 
 
-def mk_file_multiple(data, names, units, hdata, hunits, dimname, file_name):
-    fn = file_name
-    ds = nc.Dataset(fn, 'w', format='NETCDF4')
-
-    dim = ds.createDimension(dimname, None)
-    hvar = ds.createVariable(dimname, 'f4', (dimname,))
-    hvar.units = hunits
-    hvar[:] = hdata
-
+def add_data1D(ds, names, data, units, dimname):
     for i in range(len(names)):
         var = ds.createVariable(names[i], 'f4', (dimname,))
         var.units = units[i]
         var[:] = data[i]
 
-    ds.close()
+
+def add_data2D(ds, names, data, units, dimnames):
+    for i in range(len(names)):
+        var = ds.createVariable(names[i], 'f4', (dimnames[0], dimnames[1],))
+        var.units = units[i]
+        var[:] = data[i]
+
+
+def add_data3D(ds, names, data, units, dimnames):
+    for i in range(len(names)):
+        var = ds.createVariable(
+            names[i], 'f4', (dimnames[0], dimnames[1], dimnames[2],))
+        var.units = units[i]
+        var[:] = data[i]

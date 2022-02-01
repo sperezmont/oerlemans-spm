@@ -11,6 +11,7 @@ from libs import ice_parameters as ips
 from libs import bed_profile as bp
 from libs import mass_balance as mb
 from libs import ice_profile as ipf
+from libs import outmkr as outmkr
 
 # First, asses the parameter settings
 bed_type = params.bed_type
@@ -47,36 +48,31 @@ eps1, eps2, delta = rhoi/(rhob-rhoi), rhow/(rhob-rhoi), rhow/rhoi
 if sea_level == 'constant':
     eta = params.eta0
 
-# Third, we calculate the bed
+# Third, we calculate the bed and the domains
 x = np.arange(0, domain + dx, dx)
+times = np.arange(0, T + dt, dt)
 d = bp.bed_profile(bed_type, x, d0, s)
 
 # Fourth, let's calculate the time evolution
-times = np.arange(0, T + dt, dt)
-y = np.arange(0, zdomain + dz, dz)
+# Initialization
 Revo = np.empty(len(times))
-hevo = np.empty((len(times), len(y), len(x)))
-zevo = np.empty((len(times), len(y), len(x)))
+hevo = np.empty((len(times), len(x)))
+zevo = np.empty((len(times), len(x)))
 
 Revo[0] = R0
+zevo[0, :], hevo[0, :] = ipf.zh_calc(x, d, hx_model, R0, mu)
+# Calculation
 for t in range(1, len(times)):
-
     R = Revo[t-1]
 
-    zevo[t, :, :] = ipf.z_profile(hx_model, d, R, x, mu)
-    hevo[t, :, :] = ipf.ice_thickness(hx_model, R, x, mu)
-
-    if bed_type == 'linear':    # asses if marine ice-sheet
+    if bed_type == 'linear':
         rc = (d0 - eta)/s * 1e-3
 
-    if R >= rc:
+    if R >= rc:  # asses if marine ice-sheet
         marine = True
-    else:
-        marine = False
-
-    if marine:  # A calculation
         A = mb.calcA('exp', A0, CR, R)
     else:
+        marine = False
         A = mb.calcA('constant', A0)
 
     if Acc_model == 'linear':
@@ -88,5 +84,18 @@ for t in range(1, len(times)):
 
         Revo[t] = R + MB/M*dt
 
-plt.plot(zevo[0, :, :])
-plt.show()
+    # profile generation
+    zevo[t, :], hevo[t, :] = ipf.zh_calc(x, d, hx_model, Revo[t], mu)
+
+# Now we store the results on oerlemans2D.nc
+dimnames, dimdata, dimunits, dimlens = ['time', 'x'], [
+    times, x/1e3], ['yr', 'km'], [None, len(x)]
+ds = outmkr.mk_nc_file('oerlemans2D.nc', dimnames, dimdata, dimunits, dimlens)
+
+names1D, data1D, units1D = ['R'], [Revo/1e3], ['km']
+outmkr.add_data1D(ds, names1D, data1D, units1D, dimnames[0])
+
+names2D, data2D, units2D = ['z_srf', 'H_ice'], [zevo, hevo], ['m', 'm']
+outmkr.add_data2D(ds, names2D, data2D, units2D, dimnames)
+
+ds.close()

@@ -6,13 +6,13 @@ Acc_model = 'linear'        # type of accumulation
 
 sea_level = 'constant' # sea-level parameterization
 
-domain = 3040   # [km] horizontal domain
+domain = 6000   # [km] horizontal domain
 zdomain = 6000  # [m]   vertical domain
 dx = 10         # [km] horizontal resolution
 dz = 100        # [m] vertical resolution
 dt = 1000		# [yrs] time resolution
 
-T = 60000		# [yrs] length of the simulation
+T = 100000		# [yrs] length of the simulation
 
 # initial conditions
 zE0 = 100		# [m]  initial equilibrium height 
