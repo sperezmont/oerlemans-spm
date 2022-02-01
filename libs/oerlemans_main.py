@@ -11,6 +11,7 @@ from libs import ice_parameters as ips
 from libs import bed_profile as bp
 from libs import mass_balance as mb
 from libs import ice_profile as ipf
+from libs import ice_volume as iv
 from libs import outmkr as outmkr
 
 # First, asses the parameter settings
@@ -58,15 +59,26 @@ d = bp.bed_profile(bed_type, x, d0, s)
 Revo = np.empty(len(times))
 hevo = np.empty((len(times), len(x)))
 zevo = np.empty((len(times), len(x)))
+Vtot_evo, V_evo, Vsea_evo = np.empty(
+    len(times)), np.empty(len(times)), np.empty(len(times))
+
+if bed_type == 'linear':
+    rc = (d0 - eta)/s
+    if R0 >= rc:  # asses if marine ice-sheet
+        marine = True
+    else:
+        marine = False
 
 Revo[0] = R0
 zevo[0, :], hevo[0, :] = ipf.zh_calc(x, d, hx_model, R0, mu)
+Vtot_evo[0], V_evo[0], Vsea_evo[0] = iv.calc_V(marine, bed_type, hx_model,
+                                               R0, rc, s, d0, mu, eps1, eps2)
 # Calculation
 for t in range(1, len(times)):
     R = Revo[t-1]
 
     if bed_type == 'linear':
-        rc = (d0 - eta)/s * 1e-3
+        rc = (d0 - eta)/s
 
     if R >= rc:  # asses if marine ice-sheet
         marine = True
@@ -86,13 +98,18 @@ for t in range(1, len(times)):
 
     # profile generation
     zevo[t, :], hevo[t, :] = ipf.zh_calc(x, d, hx_model, Revo[t], mu)
+    Vtot_evo[t], V_evo[t], Vsea_evo[t] = iv.calc_V(marine, bed_type, hx_model,
+                                                   Revo[t], rc, s, d0, mu, eps1, eps2)
 
 # Now we store the results in oerlemans2D.nc
 dimnames, dimdata, dimunits, dimlens = ['time', 'x'], [
     times, x/1e3], ['yr', 'km'], [None, len(x)]
 ds = outmkr.mk_nc_file('oerlemans2D.nc', dimnames, dimdata, dimunits, dimlens)
 
-names1D, data1D, units1D = ['R'], [Revo/1e3], ['km']
+outmkr.add_data1D(ds, ['d'], [d], ['m'], dimnames[1])
+
+names1D, data1D, units1D = ['R', 'Vtot', 'V', 'Vsea'], [
+    Revo/1e3, Vtot_evo/1e9, V_evo/1e9, Vsea_evo/1e9], ['km', 'km3', 'km3', 'km3']
 outmkr.add_data1D(ds, names1D, data1D, units1D, dimnames[0])
 
 names2D, data2D, units2D = ['z_srf', 'H_ice'], [zevo, hevo], ['m', 'm']
