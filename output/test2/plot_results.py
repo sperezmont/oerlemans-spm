@@ -57,10 +57,10 @@ def plotgen(t):
     ax2.tick_params(axis='x', labelsize=14)
     ax2.tick_params(axis='y', labelsize=14)
 
-    ax3.plot(x, d, color='brown')
+    ax3.plot(x, d, color='saddlebrown')
     ax3.fill_between(x, len(x)*[eta[t]], min(d), color='b')
-    ax3.fill_between(x, d, min(d), color='brown')
-    ax3.plot(x, z_srf[t, :], color='grey')
+    ax3.fill_between(x, d, min(d), color='saddlebrown')
+    ax3.plot(x, z_srf[t, :], color='lightgrey')
     ax3.fill_between(x, z_srf[t, :], d, color='lightgrey')
     ax3.set_xlabel('Distance from the center, x (km)', fontsize=18)
     ax3.set_ylabel('Ice surface elevation (m)', fontsize=18)

@@ -18,6 +18,7 @@ time = data.variables['time'][:]
 x = data.variables['x'][:]
 d = data.variables['d'][:]
 eta = data.variables['eta'][:]
+zE_evo = data.variables['zE'][:]
 
 z_srf = data.variables['z_srf'][:]
 H_ice = data.variables['H_ice'][:]
@@ -36,6 +37,8 @@ rc('text', usetex=True)
 
 def plotgen(t):
     fig, [[ax1, ax2], [ax3, ax4]] = plt.subplots(2, 2, figsize=(12, 8))
+
+    fig.suptitle(r'Equilibrium height = ' + str(zE_evo[t]) + ' m', fontsize=14)
 
     ax1.plot(time, R, color='k', linewidth=3, marker='o')
     ax1.plot(time[t], R[t], color='red', marker='o', markersize=10)
@@ -57,10 +60,10 @@ def plotgen(t):
     ax2.tick_params(axis='x', labelsize=14)
     ax2.tick_params(axis='y', labelsize=14)
 
-    ax3.plot(x, d, color='brown')
+    ax3.plot(x, d, color='saddlebrown')
     ax3.fill_between(x, len(x)*[eta[t]], min(d), color='b')
-    ax3.fill_between(x, d, min(d), color='brown')
-    ax3.plot(x, z_srf[t, :], color='grey')
+    ax3.fill_between(x, d, min(d), color='saddlebrown')
+    ax3.plot(x, z_srf[t, :], color='lightgrey')
     ax3.fill_between(x, z_srf[t, :], d, color='lightgrey')
     ax3.set_xlabel('Distance from the center, x (km)', fontsize=18)
     ax3.set_ylabel('Ice surface elevation (m)', fontsize=18)

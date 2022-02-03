@@ -48,6 +48,7 @@ rm libs/*
 rmdir libs/
 
 rm oerlemans_main.py
+rm plot_results.py
 cd ..
 cp -r ${outname} ../output/
 
