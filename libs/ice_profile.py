@@ -12,7 +12,9 @@ def ice_thickness(hx_model, R, x, mu):
 def z_profile(hx_model, d, R, x, mu):
     ''' Ice surface elevation '''
     if hx_model == 'plastic':
-        z_srf = d + ice_thickness(hx_model, R, x, mu)
+        index = [j for j, v in enumerate(x) if v >= R]
+        dR = d[index[0]]
+        z_srf = dR + ice_thickness(hx_model, R, x, mu)
 
     return z_srf
 
