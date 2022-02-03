@@ -1,2 +1,2 @@
 # oerlemans-spm
-Proyect: Educative Model Oerlemans for ice sheets based on Oerlemans (2003)
+Proyect: Oerlemans educational model for ice sheets based on Oerlemans (2003)
