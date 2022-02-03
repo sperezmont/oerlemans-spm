@@ -3,7 +3,7 @@ bed_type = 'linear'	# bed profile type
 hx_model = 'plastic'   # ice sheet profile 
 geo_model = 'oerlemans2003'  # bed slope effect in ice profile 
 Acc_model = 'linear'        # type of accumulation 
-
+zE_variation ='sin'     # type of variation in zE: 'constant', 'linear', 'sin'
 sea_level = 'constant' # sea-level parameterization
 
 domain = 6000   # [km] horizontal domain
@@ -12,14 +12,14 @@ dx = 10         # [km] horizontal resolution
 dz = 100        # [m] vertical resolution
 dt = 1000		# [yrs] time resolution
 
-T = 20000		# [yrs] length of the simulation
+T = 66000		# [yrs] length of the simulation
 
 # initial conditions
-zE0 = 150		# [m]  initial equilibrium height 
-R0 = 1000		# [km] initial radium
+zE0 = 415 		# [m]  initial equilibrium height 
+R0 = 1		# [km] initial radium
 
 s = 0.001		# bed slope
-d0 = 150		# central bed elevation [m]
+d0 = 250		# central bed elevation [m]
 
 # geometry parameters
 mu0 = 8			# profile parameter [m**1/2]
@@ -29,6 +29,9 @@ c = 2e6			# [m**1/2]
 A0 = 1			# mass balance above the runoff line value (constant)  [m ice/yr]
 beta = 0.005		# mass balance gradient with respect to altitude [1/yr]
 CR = 500        # [km] distance where A = 1/e A
+
+zEA = 415   # amplitude of variation in zE [m]
+P = 22000   # forcing period [yr]
 
 # sea-level
 eta0 = 0			# eustatic sea-level [m]

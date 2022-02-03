@@ -4,7 +4,7 @@ import numpy as np
 def ice_thickness(hx_model, R, x, mu):
     ''' Ice thickness '''
     if hx_model == 'plastic':
-        h_ice = np.sqrt(mu * (R - x))
+        h_ice = np.sqrt(mu * np.abs(R - x))  # shut warnings
 
     return h_ice
 

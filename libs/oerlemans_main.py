@@ -12,17 +12,17 @@ from libs import bed_profile as bp
 from libs import mass_balance as mb
 from libs import ice_profile as ipf
 from libs import ice_volume as iv
+from libs import misc as misc
 from libs import outmkr as outmkr
 
 # First, asses the parameter settings
 bed_type = params.bed_type
-
 hx_model = params.hx_model
 geo_model = params.geo_model
-
 sea_level = params.sea_level
-
 Acc_model = params.Acc_model
+zE_variation = params.zE_variation
+
 
 # Now, we load the variables we need
 # BED PROFILE
@@ -41,8 +41,10 @@ domain, zdomain, dx, dz = params.domain * \
 dt, T = params.dt, params.T
 R0 = params.R0 * 1e3
 A0, CR = params.A0, params.CR * 1e3
+zE0, zEA, P = params.zE0, params.zEA, params.P
 
 rhoi, rhow, rhob = params.rhoi, params.rhow, params.rhob
+A_oc = params.A_oc
 f = params.f
 eps1, eps2, delta = rhoi/(rhob-rhoi), rhow/(rhob-rhoi), rhow/rhoi
 
@@ -61,7 +63,6 @@ hevo = np.empty((len(times), len(x)))
 zevo = np.empty((len(times), len(x)))
 Vtot_evo, V_evo, Vsea_evo = np.empty(
     len(times)), np.empty(len(times)), np.empty(len(times))
-
 if bed_type == 'linear':
     rc = (d0 - eta)/s
     if R0 >= rc:  # asses if marine ice-sheet
@@ -87,8 +88,10 @@ for t in range(1, len(times)):
         marine = False
         A = mb.calcA('constant', A0)
 
+    zE = ips.calc_zE(zE_variation, zE0, zEA, times[t], P)
+
     if Acc_model == 'linear':
-        zE, beta = params.zE0, params.beta
+        beta = params.beta
         zR = zE + A/beta
         MB = mb.calc_MB(marine, bed_type, hx_model, R,
                         zR, d0, s, mu, A, beta, f, delta, eta)
@@ -98,8 +101,12 @@ for t in range(1, len(times)):
 
     # profile generation
     zevo[t, :], hevo[t, :] = ipf.zh_calc(x, d, hx_model, Revo[t], mu)
+    # Volume calculation
     Vtot_evo[t], V_evo[t], Vsea_evo[t] = iv.calc_V(marine, bed_type, hx_model,
                                                    Revo[t], rc, s, d0, mu, eps1, eps2)
+
+# Now we calculate some variables
+SLE = misc.vol2sle(Vtot_evo/1e9, rhoi=rhoi, rhow=rhow, A_oc=A_oc)
 
 # Now we store the results in oerlemans2D.nc
 dimnames, dimdata, dimunits, dimlens = ['time', 'x'], [
@@ -108,8 +115,8 @@ ds = outmkr.mk_nc_file('oerlemans2D.nc', dimnames, dimdata, dimunits, dimlens)
 
 outmkr.add_data1D(ds, ['d'], [d], ['m'], dimnames[1])
 
-names1D, data1D, units1D = ['R', 'Vtot', 'V', 'Vsea'], [
-    Revo/1e3, Vtot_evo/1e9, V_evo/1e9, Vsea_evo/1e9], ['km', 'km3', 'km3', 'km3']
+names1D, data1D, units1D = ['R', 'Vtot', 'V', 'Vsea', 'SLE'], [
+    Revo/1e3, Vtot_evo/1e9, V_evo/1e9, Vsea_evo/1e9, SLE], ['km', 'km3', 'km3', 'km3', 'm SLE']
 outmkr.add_data1D(ds, names1D, data1D, units1D, dimnames[0])
 
 names2D, data2D, units2D = ['z_srf', 'H_ice'], [zevo, hevo], ['m', 'm']
