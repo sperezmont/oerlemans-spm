@@ -24,6 +24,7 @@ fi
 
 # Copy oerlemans_main.py and parameters
 cp ${locdir}/libs/oerlemans_main.py ${locouttemp}
+cp ${locdir}/libs/plot_results.py ${locouttemp}
 cp -r ${locdir}/libs/ ${locouttemp}
 cp ${locdir}/par/${parfile} ${locouttemp}/params.py
 
@@ -32,7 +33,10 @@ cd ${locouttemp}
 echo ''
 echo '** Starting simulation **'
 chmod +x oerlemans_main.py
+chmod +x plot_results.py
 python3 oerlemans_main.py
+echo '** Plotting results ... '
+python3 plot_results.py
 
 # Move to output and clean
 rm __pycache__/*

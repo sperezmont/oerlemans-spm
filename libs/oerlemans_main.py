@@ -63,7 +63,7 @@ hevo = np.empty((len(times), len(x)))
 zevo = np.empty((len(times), len(x)))
 Vtot_evo, V_evo, Vsea_evo = np.empty(
     len(times)), np.empty(len(times)), np.empty(len(times))
-is_kind = np.empty(len(times))
+is_kind, eta_evo = np.empty(len(times)), np.empty(len(times))
 
 if bed_type == 'linear':
     rc = (d0 - eta)/s
@@ -73,9 +73,17 @@ if bed_type == 'linear':
         marine = False
 Revo[0] = R0
 zevo[0, :], hevo[0, :] = ipf.zh_calc(x, d, hx_model, R0, mu)
+# isostasy contribution
+if marine:
+    zevo[0, :] = (1+eps1)*zevo[0, :] + eps2*(eta - d)
+    hevo[0, :] = (1+eps1)*hevo[0, :] + eps2*(eta - d)
+else:
+    zevo[0, :] = (1+eps1)*hevo[0, :]
+    hevo[0, :] = (1+eps1)*hevo[0, :]
+
 Vtot_evo[0], V_evo[0], Vsea_evo[0] = iv.calc_V(marine, bed_type, hx_model,
                                                R0, rc, s, d0, mu, eps1, eps2)
-is_kind[0] = marine
+is_kind[0], eta_evo[0] = marine, eta
 
 # Calculation
 for t in range(1, len(times)):
@@ -107,14 +115,17 @@ for t in range(1, len(times)):
 
     # isostasy contribution
     if marine:
+        zevo[t, :] = (1+eps1)*zevo[t, :] + eps2*(eta - d)
         hevo[t, :] = (1+eps1)*hevo[t, :] + eps2*(eta - d)
     else:
+        zevo[t, :] = (1+eps1)*hevo[t, :]
         hevo[t, :] = (1+eps1)*hevo[t, :]
 
     # Volume calculation
     Vtot_evo[t], V_evo[t], Vsea_evo[t] = iv.calc_V(marine, bed_type, hx_model,
                                                    Revo[t], rc, s, d0, mu, eps1, eps2)
-    is_kind[t] = marine
+    is_kind[t], eta_evo[t] = marine, eta
+
 
 # Now we calculate some variables
 SLE = misc.vol2sle(Vtot_evo/1e9, rhoi=rhoi, rhow=rhow, A_oc=A_oc)
@@ -126,8 +137,8 @@ ds = outmkr.mk_nc_file('oerlemans2D.nc', dimnames, dimdata, dimunits, dimlens)
 
 outmkr.add_data1D(ds, ['d'], [d], ['m'], dimnames[1])
 
-names1D, data1D, units1D = ['R', 'Vtot', 'V', 'Vsea', 'SLE', 'Ice Sheet type'], [
-    Revo/1e3, Vtot_evo/1e9, V_evo/1e9, Vsea_evo/1e9, SLE, is_kind], ['km', 'km3', 'km3', 'km3', 'm SLE', 'Marine/Continental']
+names1D, data1D, units1D = ['R', 'Vtot', 'V', 'Vsea', 'SLE', 'Ice Sheet type', 'eta'], [
+    Revo/1e3, Vtot_evo/1e9, V_evo/1e9, Vsea_evo/1e9, SLE, is_kind, eta], ['km', 'km3', 'km3', 'km3', 'm SLE', 'Marine/Continental', 'm']
 outmkr.add_data1D(ds, names1D, data1D, units1D, dimnames[0])
 
 names2D, data2D, units2D = ['z_srf', 'H_ice'], [zevo, hevo], ['m', 'm']

@@ -23,9 +23,8 @@ def zh_calc(x, d, hx_model, R, mu):
     ''' Calculation '''
     z = z_profile(hx_model, d, R, x, mu)
     h = ice_thickness(hx_model, R, x, mu)
-    index = [j for j, v in enumerate(x) if v > R]
+    index = [j for j, v in enumerate(x) if v >= R]
     z[index[0]] = d[index[0]]
-    h[index[0]] = d[index[0]]
     z[index[1]:] = np.NaN
     h[index[1]:] = np.NaN
 

@@ -6,7 +6,7 @@ Acc_model = 'linear'        # type of accumulation
 zE_variation ='sin'     # type of variation in zE: 'constant', 'linear', 'sin'
 sea_level = 'constant' # sea-level parameterization
 
-domain = 6000   # [km] horizontal domain
+domain = 2000   # [km] horizontal domain
 zdomain = 6000  # [m]   vertical domain
 dx = 10         # [km] horizontal resolution
 dz = 100        # [m] vertical resolution
