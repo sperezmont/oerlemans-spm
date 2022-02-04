@@ -2,7 +2,7 @@
 
 # Script to run Oerlemans-spm model
 echo ''
-echo '## Running Oerlemans model ##'
+echo '## Running oerlemans-spm ##'
 
 # Paths
 parfile=${1}

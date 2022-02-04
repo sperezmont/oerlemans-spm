@@ -41,15 +41,13 @@ domain, zdomain, dx, dz = params.domain * \
 dt, T = params.dt, params.T
 R0 = params.R0 * 1e3
 A0, CR = params.A0, params.CR * 1e3
-zE0, zEA, P = params.zE0, params.zEA, params.P
+zE0, zEA, zEP = params.zE0, params.zEA, params.zEP
 
 rhoi, rhow, rhob = params.rhoi, params.rhow, params.rhob
 A_oc = params.A_oc
 f = params.f
 eps1, eps2, delta = rhoi/(rhob-rhoi), rhow/(rhob-rhoi), rhow/rhoi
-
-if sea_level == 'constant':
-    eta = params.eta0
+eta0, etaA, etaP = params.eta0, params.etaA, params.etaP
 
 # Third, we calculate the bed and the domains
 x = np.arange(0, domain + dx, dx)
@@ -67,10 +65,13 @@ zE_evo, is_kind, eta_evo = np.empty(len(times)), np.empty(
     len(times)), np.empty(len(times))
 rgr_evo = np.empty(len(times))
 
+eta = ips.calc_eta(sea_level, eta0, etaA, 0, etaP)
+
 if bed_type == 'linear':
     rc = (d0 - eta)/s
     if R0 >= rc:  # asses if marine ice-sheet
         marine = True
+        rgr_evo[0] = mb.calc_rgr(bed_type, hx_model, R0, s, d0, mu)
     else:
         marine = False
 Revo[0] = R0
@@ -91,6 +92,7 @@ is_kind[0], eta_evo[0], zE_evo[0] = marine, eta, zE0
 for t in range(1, len(times)):
     R = Revo[t-1]
 
+    eta = ips.calc_eta(sea_level, eta0, etaA, times[t], etaP)
     if bed_type == 'linear':
         rc = (d0 - eta)/s
 
@@ -101,25 +103,26 @@ for t in range(1, len(times)):
         marine = False
         A = mb.calcA('constant', A0)
 
-    zE = ips.calc_zE(zE_variation, zE0, zEA, times[t], P)
+    zE = ips.calc_zE(zE_variation, zE0, zEA, times[t], zEP)
     zE_evo[t] = zE
 
     if Acc_model == 'linear':
         beta = params.beta
         zR = zE + A/beta
         if marine:
-            MB, rgr_evo[t] = mb.calc_MB(marine, bed_type, hx_model, R,
-                                        zR, d0, s, mu, A, beta, f, delta, eta)
+            MB = mb.calc_MB(marine, bed_type, hx_model, R,
+                            zR, d0, s, mu, A, beta, f, delta, eta)
         else:
             MB = mb.calc_MB(marine, bed_type, hx_model, R,
                             zR, d0, s, mu, A, beta, f, delta, eta)
-        M = mb.calc_M(marine, bed_type, hx_model, R, s, d0, mu, eps1, eps2)
+        M = mb.calc_M(marine, bed_type, hx_model,
+                      R, s, d0, mu, eta, eps1, eps2)
 
         Revo[t] = R + MB/M*dt
 
     # profile generation
     zevo[t, :], hevo[t, :] = ipf.zh_calc(x, d, hx_model, Revo[t], mu)
-
+    rgr_evo[t] = mb.calc_rgr(bed_type, hx_model, Revo[t], s, d0, mu)
     # isostasy contribution
     if marine:
         zevo[t, :] = (1+eps1)*zevo[t, :] + eps2*(eta - d)
@@ -145,7 +148,7 @@ ds = outmkr.mk_nc_file('oerlemans2D.nc', dimnames, dimdata, dimunits, dimlens)
 outmkr.add_data1D(ds, ['d'], [d], ['m'], dimnames[1])
 
 names1D, data1D, units1D = ['R', 'Vtot', 'V', 'Vsea', 'SLE', 'Ice Sheet type', 'eta', 'zE', 'rgr'], [
-    Revo/1e3, Vtot_evo/1e9, V_evo/1e9, Vsea_evo/1e9, SLE, is_kind, eta, zE_evo, rgr_evo/1e3], ['km', 'km3', 'km3', 'km3', 'm SLE', 'Marine/Continental', 'm', 'm', 'km']
+    Revo/1e3, Vtot_evo/1e9, V_evo/1e9, Vsea_evo/1e9, SLE, is_kind, eta_evo, zE_evo, rgr_evo/1e3], ['km', 'km3', 'km3', 'km3', 'm SLE', 'Marine/Continental', 'm', 'm', 'km']
 outmkr.add_data1D(ds, names1D, data1D, units1D, dimnames[0])
 
 names2D, data2D, units2D = ['z_srf', 'H_ice'], [zevo, hevo], ['m', 'm']

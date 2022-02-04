@@ -31,10 +31,12 @@ beta = 0.005		# mass balance gradient with respect to altitude [1/yr]
 CR = 500        # [km] distance where A = 1/e A
 
 zEA = 300   # amplitude of variation in zE [m]
-P = 22000   # forcing period [yrs]
+zEP = 22000   # forcing period [yrs]
 
 # sea-level
 eta0 = 0			# eustatic sea-level [m]
+etaA = 50           # sea-level forcing amplitude [m]
+etaP = 22000        # sea-level forcing period [yr]
 
 # grounding line
 f = 1			# yr-1

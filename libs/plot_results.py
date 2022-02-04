@@ -4,12 +4,14 @@ import numpy as np
 
 import netCDF4 as nc
 
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib import rc
 import matplotlib.path as mpath
 
 import imageio
+
+from params import s, d0
 
 # Load
 data = nc.Dataset('oerlemans2D.nc')
@@ -32,7 +34,6 @@ plt.rcParams['font.family'] = 'DeJavu Serif'
 plt.rcParams['font.serif'] = ['Times New Roman']
 rc('text', usetex=True)
 
-
 # Plotting
 
 
@@ -40,12 +41,20 @@ def plotgen(t):
     fig, [[ax1, ax2], [ax3, ax4]] = plt.subplots(2, 2, figsize=(12, 8))
 
     ax1.plot(x, d, color='saddlebrown')
-    ax1.fill_between(x, len(x)*[eta[t]], min(d), color='b')
+    ax1.fill_between(x, len(x)*[eta[t]], min(d), color='lightblue')
     ax1.fill_between(x, d, min(d), color='saddlebrown')
     ax1.plot(x, z_srf[t, :], color='lightgrey')
     ax1.fill_between(x, z_srf[t, :], d, color='lightgrey')
-    ax1.plot(rgr[t], 0, color='k', marker='v', markersize=10)
-    ax1.set_xlabel('Distance from the center, x (km)', fontsize=18)
+
+    index = [j for j, v in enumerate(x) if v >= R[t]]
+    drgr = d[index[0]]
+    if drgr >= 0:
+        ax1.plot(rgr[t], 1.2*drgr, color='olive', marker='v', markersize=10)
+    else:
+        ax1.plot(rgr[t], 0.8*drgr, color='olive', marker='v', markersize=10)
+    ax1.plot(1.2*R[t], zE[t], color='indigo', marker='<', markersize=10)
+    ax1.axhline(y=eta[0], color='k', linestyle='--')
+    ax1.set_xlabel('Distance to the center (km)', fontsize=18)
     ax1.set_ylabel('Ice surface elevation (m)', fontsize=18)
     ax1.set_xlim([x[0], x[-1]])
     ax1.set_ylim([min(d), np.nanmax(z_srf)])
@@ -53,36 +62,54 @@ def plotgen(t):
     ax1.tick_params(axis='y', labelsize=14)
     ax1.xaxis.set_label_position('top')
     ax1.xaxis.tick_top()
+    custom_lines = [mpl.lines.Line2D([0], [0], ls='None', marker=None),
+                    mpl.lines.Line2D([0], [0], ls='None', marker=None)]
+    leg = ax1.legend(custom_lines, [
+        's = '+str(s), 'd0 = '+str(d0)+' m'], loc='upper right', markerscale=0.0001, fontsize=12, handlelength=0)
+    leg._legend_box.align = 'left'
+    leg.get_title().set_fontsize('14')
 
-    ax2.plot(time, SLE, color='blue', linewidth=3, marker='o')
+    ax2.plot(time, SLE, color='dodgerblue', linewidth=3)
     ax2.plot(time[t], SLE[t], color='red', marker='o', markersize=10)
-    ax2.set_ylabel('Volume (m SLE)', fontsize=18)
-    ax2.set_xlim([time[0], time[-1]])
-    ax2.set_ylim([0, 1.1*max(SLE)])
+    ax2.set_ylabel('Ice volume (m SLE)', fontsize=18)
+    ax2.set_ylim([0.9*min(SLE), 1.1*max(SLE)])
     ax2.grid(linestyle='--')
     ax2.set_xticklabels([])
     ax2.tick_params(axis='x', labelsize=14)
     ax2.tick_params(axis='y', labelsize=14)
 
-    ax3.plot(time, R, color='k', linewidth=3, marker='o')
+    ax3.plot(time, R, color='lightslategrey', linewidth=3, label='R')
     ax3.plot(time[t], R[t], color='red', marker='o', markersize=10)
+    ax3.plot(time, rgr, color='olive', linewidth=2.8, label=r'$r_{gr}$')
+    ax3.plot(time[t], rgr[t], color='red', marker='o', markersize=8)
     ax3.set_xlabel('Time (yrs)', fontsize=18)
-    ax3.set_ylabel('R (km)', fontsize=18)
-    ax3.set_xlim([time[0], time[-1]])
-    ax3.set_ylim([0, 1.1*max(R)])
+    ax3.set_ylabel('Distance to the center (km)', fontsize=18)
+    ax3.set_ylim([0.9*min(R), 1.1*max(R)])
     ax3.grid(linestyle='--')
     ax3.tick_params(axis='x', labelsize=14)
     ax3.tick_params(axis='y', labelsize=14)
+    ax3.legend(fontsize=14)
 
-    ax4.plot(time, zE, color='darkgrey', linewidth=3, marker='o')
+    lns1 = ax4.plot(time, zE, color='indigo', linewidth=5, label=r'$z_E$')
     ax4.plot(time[t], zE[t], color='red', marker='o', markersize=10)
     ax4.set_xlabel('Time (yrs)', fontsize=18)
     ax4.set_ylabel('Equilibrium height (m)', fontsize=18)
-    ax4.set_xlim([time[0], time[-1]])
-    ax4.set_ylim([min(zE), 1.1*max(zE)])
-    ax4.grid(linestyle='--')
+    if all(element == zE[0] for element in zE):
+        ax4.set_ylim([0.7*min(zE), 1.2*max(zE)])
+    else:
+        ax4.set_ylim([0.7*min(zE), 1.1*max(zE)])
+    ax44 = ax4.twinx()
+    lns2 = ax44.plot(time, eta, color='lightblue',
+                     linewidth=3, label=r'$\eta$')
+    ax44.plot(time[t], eta[t], color='red', marker='o', markersize=10)
+    ax44.set_ylabel('Sea-level (m)', rotation=270, labelpad=15, fontsize=18)
+    ax4.grid(axis='x', linestyle='--')
     ax4.tick_params(axis='x', labelsize=14)
     ax4.tick_params(axis='y', labelsize=14)
+    ax44.tick_params(axis='y', labelsize=14)
+    lns = lns1+lns2
+    labs = [l.get_label() for l in lns]
+    ax44.legend(lns, labs, fontsize=14)
 
     fig.canvas.draw()
     image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
