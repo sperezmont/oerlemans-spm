@@ -1,0 +1,15 @@
+#! /bin/bash
+echo ''
+echo '#### Running predefined tests ####'
+
+echo 'test1: Constant forcing'
+./runmodel params_test1.nml test1
+
+echo 'test2: Periodical forcing in zE'
+./runmodel params_test2.nml test2
+
+echo 'test3: Periodical forcing in sea level'
+./runmodel params_test3.nml test3
+
+echo 'test4: Periodical forcing in both zE and sea level'
+./runmodel params_test4.nml test4
