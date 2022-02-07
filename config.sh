@@ -1,5 +1,6 @@
 #! /bin/bash
 echo 'Configuration in progress ...'
+[ ! -d "./temp/" ] && mkdir './temp/'
 
 echo 'Installing requirements ...'
 pip install -r config/requirements.txt
