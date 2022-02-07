@@ -7,6 +7,8 @@ echo '## Running oerlemans-spm ##'
 # Paths
 parfile=${1}
 outname=${2}
+env_name='oerlemans_env'
+conda_path='/home/sergio/'  # change if needed
 
 echo '* Parameter file --> '${parfile}''
 echo '* Output directory name --> '${outname}''
@@ -34,9 +36,15 @@ echo ''
 echo '** Starting simulation **'
 chmod +x oerlemans_main.py
 chmod +x plot_results.py
+
+source ${conda_path}/anaconda3/etc/profile.d/conda.sh
+
+conda activate ${env_name}
 python3 oerlemans_main.py
+
 echo '** Plotting results ... '
 python3 plot_results.py
+conda deactivate
 
 # Move to output and clean
 rm __pycache__/*
