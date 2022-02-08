@@ -7,6 +7,13 @@ https://npg.copernicus.org/articles/10/441/2003/
 ```bash
 git clone https://github.com/sperezmont/oerlemans-spm.git
 ```
+
+If you want to make some changes or improvements, make a new branch
+```bash
+git checkout -b branch_name
+```
+where `branch_name` is the name of the new branch
+
 * Setup
 
 Enter directory, enable and run config.sh. You may need to change lines 2,3 and 4 of config.sh to your system paths. This script will install the necessary python dependencies and the corresponding virtual environment.
