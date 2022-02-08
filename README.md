@@ -21,7 +21,7 @@ chmod +x config.sh
 ```bash
 ./runmodel params_name.nml exp_name
 ```
-where `params_name` is the name of the parameters file located in `/par/` and `exp_name` the name of the corresponding experiment.
+where `params_name.nml` is the name of the parameters file located in `/par/` and `exp_name` the name of the corresponding experiment.
 
 # Tests
 In order to get used to the functioning of the model you can run some predefined tests
