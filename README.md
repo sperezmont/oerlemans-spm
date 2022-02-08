@@ -26,6 +26,7 @@ chmod +x config.sh
 
 # How to run an experiment
 ```bash
+cd oerlemans-spm
 ./runmodel params_name.nml exp_name
 ```
 where `params_name.nml` is the name of the parameters file located in `/par/` and `exp_name` the name of the corresponding experiment.
