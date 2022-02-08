@@ -7,8 +7,8 @@ https://npg.copernicus.org/articles/10/441/2003/
 ```bash
 git clone https://github.com/sperezmont/oerlemans-spm.git
 ```
-* Setup: Enter directory, enable and run config.sh
-You may need to change lines 2,3 and 4 of config.sh to your system paths. This script will install the necessary python dependencies and the corresponding virtual environment.
+* Setup
+Enter directory, enable and run config.sh. You may need to change lines 2,3 and 4 of config.sh to your system paths. This script will install the necessary python dependencies and the corresponding virtual environment.
 ```bash
 cd oerlemans-spm
 chmod +x config.sh
