@@ -16,6 +16,34 @@ chmod +x config.sh
 ```
 * Finally edit lines 10 and 11 in `runmodel` if needed with your virtual environment name (`env_name`) and `path` to anaconda.
 
+# How to run an experiment
+```bash
+./runmodel params_name.nml exp_name
+```
+where `params_name` is the name of the parameters file located in `/par/` and `exp_name` the name of the corresponding experiment.
+
 # Tests
 In order to get used to the functioning of the model you can run some predefined tests
-* Test 1:
+* Test 1: Constant forcing
+```bash
+./runmodel params_test1.nml test1
+```
+
+* Test 2: Periodical forcing in zE
+```bash
+./runmodel params_test2.nml test2
+```
+
+* Test 3: Periodical forcing in sea level
+```bash
+./runmodel params_test3.nml test3
+```
+
+* Test 4: Periodical forcing in both zE and sea level
+```bash
+./runmodel params_test4.nml test4
+```
+You can even run all the experiments at the same time with
+```bash
+./runtests
+```
