@@ -33,7 +33,7 @@ where `params_name.nml` is the name of the parameters file located in `/par/` an
 
 # Tests
 In order to get used to the functioning of the model you can run some predefined tests
-* Test 1: Constant forcing
+* Test 1: No forcing
 ```bash
 ./runmodel params_test1.nml test1
 ```
