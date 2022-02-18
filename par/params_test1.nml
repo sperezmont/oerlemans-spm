@@ -19,7 +19,7 @@ zE0 = 150		# [m]  initial equilibrium height
 R0 = 1000		# [km] initial radium
 
 s = 0.001		# bed slope
-d0 = 150		# central bed elevation [m]
+d0 = 250		# central bed elevation [m]
 
 # geometry parameters
 mu0 = 8			# profile parameter [m**1/2]
