@@ -2,7 +2,7 @@
 echo ''
 echo '#### Running predefined tests ####'
 
-echo 'test1: Constant forcing'
+echo 'test1: No forcing'
 ./runmodel params_test1.nml test1
 
 echo 'test2: Periodical forcing in zE'
