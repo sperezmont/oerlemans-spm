@@ -5,6 +5,7 @@ py_version='3.7.3'       # python version
 
 echo 'Configuration in progress ...'
 [ ! -d "./temp/" ] && mkdir './temp/'
+[ ! -d "./output/" ] && mkdir './output/'
 
 echo 'Installing requirements ...'
 source ${conda_path}/anaconda3/etc/profile.d/conda.sh
