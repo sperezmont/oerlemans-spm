@@ -112,9 +112,11 @@ def plotgen(t):
     drgr = d[index[0]]
     if drgr <= eta[t]:
         rgr_point = ax1.plot(
-            rgr[t], 1.6*drgr, color='olive', marker='^', markersize=10, zorder=9)
+            rgr[t], 1.6*drgr, color='olive', marker='^', markersize=10, zorder=9, markeredgecolor='k')
     zE_point = ax1.plot(1.2*R[t], zE[t], color='indigo',
-                        marker='<', markersize=10, zorder=10)
+                        marker='<', markersize=10, zorder=10, markeredgecolor='k')
+    sea_point = ax1.plot(0.9*x[-1], eta[t], marker='<',
+                         markeredgecolor='k', color='lightblue', zorder=10, markersize=10)
 
     # second panel
     sle_point = ax2.plot(time[t], SLE[t], color='red',
@@ -139,6 +141,7 @@ def plotgen(t):
     sea.remove()
     ice_cont.remove()
     remove_lines(zE_point)
+    remove_lines(sea_point)
     if drgr <= eta[t]:
         remove_lines(rgr_point)
     remove_lines(sle_point)

@@ -63,7 +63,7 @@ Vtot_evo, V_evo, Vsea_evo = np.empty(
     len(times)), np.empty(len(times)), np.empty(len(times))
 zE_evo, is_kind, eta_evo = np.empty(len(times)), np.empty(
     len(times)), np.empty(len(times))
-rgr_evo = np.empty(len(times))
+rgr_evo = np.full(len(times), np.NaN)
 
 eta = ips.calc_eta(sea_level, eta0, etaA, 0, etaP)
 
@@ -122,7 +122,8 @@ for t in range(1, len(times)):
 
     # profile generation
     zevo[t, :], hevo[t, :] = ipf.zh_calc(x, d, hx_model, Revo[t], mu)
-    rgr_evo[t] = mb.calc_rgr(bed_type, hx_model, Revo[t], s, d0, mu)
+    if marine:
+        rgr_evo[t] = mb.calc_rgr(bed_type, hx_model, Revo[t], s, d0, mu)
     # isostasy contribution
     if marine:
         zevo[t, :] = (1+eps1)*zevo[t, :] + eps2*(eta - d)

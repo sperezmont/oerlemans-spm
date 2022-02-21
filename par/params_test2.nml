@@ -2,7 +2,9 @@
 bed_type = 'linear'	# bed profile type
 hx_model = 'plastic'   # ice sheet profile 
 geo_model = 'oerlemans2003'  # bed slope effect in ice profile 
-Acc_model = 'linear'        # type of accumulation 
+Acc_model = 'linear'        # type of accumulation
+
+# forcings  
 zE_variation ='sin'     # type of variation in zE: 'constant', 'linear', 'sin'
 sea_level = 'constant' # sea-level parameterization
 
