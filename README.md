@@ -2,7 +2,7 @@
 Oerlemans conceptual model for ice sheets based on Oerlemans (2003)
 https://npg.copernicus.org/articles/10/441/2003/
 
-Note: Some of the equations that appear on the paper are wrong so It is not recommended to copy them (I'm working on a documentation for the entire model)
+Note: Some of the equations that appear on the paper are wrong so It is not recommended to copy them (I'm working on some documentation for the entire model)
 
 # Quick start guide
 * Download
