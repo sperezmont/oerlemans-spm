@@ -1,5 +1,5 @@
 # oerlemans-spm
-Oerlemans conceptual model for ice sheets based on Oerlemans (2003)
+Conceptual model for ice sheets based on Oerlemans (2003)
 https://npg.copernicus.org/articles/10/441/2003/
 
 Note: Some of the equations that appear on the paper are wrong so it is not recommended to copy them without check if they are correct (I'm working on some documentation for the entire model)
